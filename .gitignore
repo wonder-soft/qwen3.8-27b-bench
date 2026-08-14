@@ -1,0 +1,29 @@
+results/**/target/
+results/**/raw/*.bin
+*.gguf
+.DS_Store
+results/**/.scala-build/
+results/**/__pycache__/
+results/**/.pytest_cache/
+results/**/Cargo.lock
+
+# ベンチ実行で生じるビルド成果物・実行ログ
+results/**/task_api
+results/*.log
+__pycache__/
+*.pyc
+
+# ホスト固有の設定（パス・ポート・トークン）。example のみコミットする
+serving/env.sh
+
+# ローカルの OpenCode 設定
+opencode/opencode.json
+
+# ベンチ生ログ
+results/**/*.log
+results/**/conc-*.json
+results/ctx_sweep/
+results/throughput/
+results/repeat-*/
+results/agent/
+
