@@ -138,7 +138,8 @@ opencode/
 docs/
   SETUP.md               host prep through OpenCode connection
   RESUMING.md            handoff to another session <- start here
-  reports/               measurement reports (empty)
+  VISION.md              loading the projector; images from OpenCode
+  reports/               measurement reports
 results/                 artifacts and raw logs
 ```
 

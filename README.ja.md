@@ -132,7 +132,8 @@ opencode/
 docs/
   SETUP.md               ホスト準備から OpenCode 接続まで
   RESUMING.md            別セッションへの引き継ぎ ← ここから読む
-  reports/               計測レポート（まだ空）
+  VISION.md              projector の読ませ方・OpenCode から画像を投げる
+  reports/               計測レポート
 results/                 生成物・生ログ
 ```
 
