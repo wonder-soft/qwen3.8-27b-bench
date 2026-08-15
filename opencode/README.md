@@ -18,6 +18,35 @@ an OpenCode backend, so this is the part that matters. Not a synthetic score —
    llama-server runs without `--api-key`
 4. Launch `opencode` → `/models` → `qwen38-local/qwen3.8-27b`
 
+## Using vision
+
+Qwen3.8-27B is multimodal, so loading the mmproj lets OpenCode send images.
+Not needed for coding, but it enables handing it a screenshot to implement a UI
+from, or an error screen to read.
+
+```bash
+WANT_MMPROJ=1 MMPROJ_FILE=mmproj-F16.gguf ./01_download_model.sh   # 0.93 GB
+WANT_MMPROJ=1 ./02_serve_llamacpp.sh
+```
+
+`loaded multimodal model` in the startup log means it took. VRAM cost is
+**+1.1 GB** (26.1 GB → 27.3 GB at `CTX=262144`), so on one 32 GB card it fits
+without giving up any context.
+
+On the OpenCode side two lines from `opencode.json.example` are required.
+Miss either one and images attach in the UI but never reach the server.
+
+```json
+"attachment": true,
+"modalities": { "input": ["text", "image"], "output": ["text"] }
+```
+
+**Do not starve `max_tokens`.** With thinking on, the reasoning runs before the
+answer. At `max_tokens=512` the budget is spent entirely on thinking and the
+response comes back with empty content — which looks like the model failing to
+read the image when it read it fine. Measured on one screenshot: 4,511 reasoning
+chars, 1,413 completion tokens in total, 21 s.
+
 ## Check first
 
 **The tool-call round trip in `serving/03_smoke.sh` must pass.** Starting

@@ -19,6 +19,35 @@
    AI SDK 側がキーを要求するため、空でない何かが要る）
 4. `opencode` を起動 → `/models` → `qwen38-local/qwen3.8-27b` を選択
 
+## vision を使う
+
+Qwen3.8-27B はマルチモーダルなので、mmproj を読ませれば OpenCode から
+画像を投げられる。コーディングには不要だが、スクリーンショットを渡して
+UI を実装させる、エラー画面を読ませる、といった使い方ができる。
+
+```bash
+WANT_MMPROJ=1 MMPROJ_FILE=mmproj-F16.gguf ./01_download_model.sh   # 0.93 GB
+WANT_MMPROJ=1 ./02_serve_llamacpp.sh
+```
+
+起動ログに `loaded multimodal model` が出れば有効。VRAM は
+**+1.1 GB**（`CTX=262144` で 26.1 GB → 27.3 GB）なので、32 GB 1 枚なら
+コンテキストを削らずに載る。
+
+OpenCode 側は `opencode.json.example` の 2 行が要る。
+どちらか欠けると画像が添付できても送られない。
+
+```json
+"attachment": true,
+"modalities": { "input": ["text", "image"], "output": ["text"] }
+```
+
+**`max_tokens` を切り詰めないこと。** thinking を有効にしたまま画像を渡すと
+思考が先に走る。`max_tokens=512` では思考だけで打ち切られ、本文が空のまま
+返ってくる — モデルが画像を読めていないように見えるが、実際には読めている。
+実測では 1 枚のスクリーンショットに対し reasoning が 4,511 文字、
+本文まで含めて completion 1,413 トークン / 21 秒だった。
+
 ## 先に確認すること
 
 **`serving/03_smoke.sh` の tool call ラウンドトリップが通っていること。**
