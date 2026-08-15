@@ -11,8 +11,10 @@ Qwen3.6-27B / Qwen3-Coder-Next 80B、および
 [deepseek-v4-flash-bench](https://github.com/wonder-soft/deepseek-v4-flash-bench)
 の DeepSeek-V4-Flash 284B で取った既存の数字と直接比較できる。
 
-> **現状: 未計測。** リポジトリは組んだが、実機に触っていない。
-> 始点は [`docs/RESUMING.ja.md`](docs/RESUMING.ja.md)。
+> **現状: M0〜M4 計測済み（2026-08-15）。** 全文は
+> [`docs/reports/2026-08-15-m0-m4-thinking-axis.ja.md`](docs/reports/2026-08-15-m0-m4-thinking-axis.ja.md)。
+> M5（OpenCode 実運用）は未着手 — 始点は
+> [`docs/RESUMING.ja.md`](docs/RESUMING.ja.md)。
 
 ## 対象
 
@@ -53,21 +55,28 @@ cab の Qwen3.6-27B は RTX 5090 32GB ×1 / llama.cpp / Q4_K_M で測られて�
 
 ### pass@1（n=5、test まで通ったもの）
 
-| 言語 | DeepSeek-V4-Flash 284B | Qwen3.6-27B | **Qwen3.8-27B** |
-|---|---:|---:|---:|
-| Go / net/http | 5/5 | 5/5 | — |
-| Python / FastAPI | 4/5 | 5/5 | — |
-| Rust / axum 0.8 | 2/5 | **0/5** | — |
-| Scala / http4s | 0/5 | **0/5** | — |
+| 言語 | DeepSeek-V4-Flash 284B | Qwen3.6-27B | **Qwen3.8-27B（think）** | **Qwen3.8-27B（instruct）** |
+|---|---:|---:|---:|---:|
+| Go / net/http | 5/5 | 5/5 | **5/5** | **5/5** |
+| Python / FastAPI | 4/5 | 5/5 | **4/5** | **5/5** |
+| Rust / axum 0.8 | 2/5 | **0/5** | **0/5** | **0/5** |
+| Scala / http4s | 0/5 | **0/5** | **0/5** | **0/5** |
+
+Qwen3.8 の 2 つのゼロは、2 列で同じ失敗ではない。thinking モードでは
+**出力が一切ない** — 24,000 トークンの予算を思考ブロックの中で使い切った状態が
+10/10 で再現した。instruct モードでは実際の実装を出し、
+単一のライブラリイディオムでコンパイルに失敗している。詳細はレポート。
 
 ### その他
 
 | 軸 | DeepSeek 284B | Qwen3.6-27B | **Qwen3.8-27B** |
 |---|---:|---:|---:|
-| tool 選択精度（n=30） | 93.3% | 90.0% | — |
-| 不正な tool call | 0/169 | 0/166 | — |
-| エージェント完遂 | 18/18 | 18/18 | — |
-| Scala 修正ループ | 2 ラウンドで収束 | **3 ラウンドで収束せず** | — |
+| tool 選択精度（n=30） | 93.3% | 90.0% | **83.3%** |
+| 不正な tool call | 0/169 | 0/166 | **0/196** |
+| エージェント完遂 | 18/18 | 18/18 | **26/26** |
+| Scala 修正ループ | 2 ラウンドで収束 | **3 ラウンドで収束せず** | 未実施 |
+| 32GB 1 枚での CTX 上限 | — | — | **262,144（ネイティブ上限）** |
+| 単発 decode | — | — | **68.3 tok/s**、TTFT 0.52 s |
 
 **太字が仮説の的。** Rust のテスト（0/5）、Scala（0/5）、修正ループの非収束が
 Qwen3.6 の明確な弱点で、3.8 の公称値（SWE-Bench Pro 61.7% / LiveCodeBench v6 90.3%）が

@@ -12,8 +12,10 @@ cab's Qwen3.6-27B and Qwen3-Coder-Next 80B, and against the DeepSeek-V4-Flash
 284B numbers in
 [deepseek-v4-flash-bench](https://github.com/wonder-soft/deepseek-v4-flash-bench).
 
-> **Status: nothing measured yet.** The repo is scaffolded; no hardware has been
-> touched. Start at [`docs/RESUMING.md`](docs/RESUMING.md).
+> **Status: M0–M4 measured, 2026-08-15.** Full write-up in
+> [`docs/reports/2026-08-15-m0-m4-thinking-axis.md`](docs/reports/2026-08-15-m0-m4-thinking-axis.md).
+> M5 (OpenCode in real use) is still open — start at
+> [`docs/RESUMING.md`](docs/RESUMING.md).
 
 ## Target
 
@@ -57,21 +59,29 @@ comparison is banked:
 
 ### pass@1 (n=5, build **and** test passing)
 
-| Language | DeepSeek-V4-Flash 284B | Qwen3.6-27B | **Qwen3.8-27B** |
-|---|---:|---:|---:|
-| Go / net/http | 5/5 | 5/5 | — |
-| Python / FastAPI | 4/5 | 5/5 | — |
-| Rust / axum 0.8 | 2/5 | **0/5** | — |
-| Scala / http4s | 0/5 | **0/5** | — |
+| Language | DeepSeek-V4-Flash 284B | Qwen3.6-27B | **Qwen3.8-27B (think)** | **Qwen3.8-27B (instruct)** |
+|---|---:|---:|---:|---:|
+| Go / net/http | 5/5 | 5/5 | **5/5** | **5/5** |
+| Python / FastAPI | 4/5 | 5/5 | **4/5** | **5/5** |
+| Rust / axum 0.8 | 2/5 | **0/5** | **0/5** | **0/5** |
+| Scala / http4s | 0/5 | **0/5** | **0/5** | **0/5** |
+
+The two Qwen3.8 zeros are not the same failure in both columns. In thinking mode
+the model emitted **no output at all** — it spent the whole 24,000-token budget
+inside its reasoning block, in 10/10 runs. In instruct mode it produced a real
+implementation that fails to compile on one recurring library idiom. See the
+report.
 
 ### Everything else
 
 | Axis | DeepSeek 284B | Qwen3.6-27B | **Qwen3.8-27B** |
 |---|---:|---:|---:|
-| Tool selection accuracy (n=30) | 93.3% | 90.0% | — |
-| Invalid tool calls | 0/169 | 0/166 | — |
-| Agent episodes completed | 18/18 | 18/18 | — |
-| Scala repair loop | converged round 2 | **never converged in 3** | — |
+| Tool selection accuracy (n=30) | 93.3% | 90.0% | **83.3%** |
+| Invalid tool calls | 0/169 | 0/166 | **0/196** |
+| Agent episodes completed | 18/18 | 18/18 | **26/26** |
+| Scala repair loop | converged round 2 | **never converged in 3** | not run |
+| Context ceiling on one 32 GB card | — | — | **262,144 (native max)** |
+| Single-stream decode | — | — | **68.3 tok/s**, TTFT 0.52 s |
 
 **The bold cells are the hypothesis.** Rust tests (0/5), Scala (0/5), and the
 non-converging repair loop are Qwen3.6's sharp failures. If 3.8's published

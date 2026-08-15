@@ -24,6 +24,18 @@ results/**/*.log
 results/**/conc-*.json
 results/ctx_sweep/
 results/throughput/
+results/repeat/
 results/repeat-*/
 results/agent/
+
+# OpenCode に書かせたサンプルコード。ソースだけ残してビルド成果物は捨てる
+# （今回は rust の target/ が 157 MB、scala が 87 MB あった）
+output/**/target/
+output/**/.bsp/
+output/**/.scala-build/
+output/**/.metals/
+output/**/.bloop/
+
+# sbt / scala-cli をリポジトリ直下で走らせた時に湧く空の target/
+/target/
 
